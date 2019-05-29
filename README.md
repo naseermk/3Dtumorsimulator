@@ -10,3 +10,10 @@ Each cell is modeled as a deformable sphere with a time-dependent radius.
 Several physical properties, such as the radius, elastic modulus, 
 membrane receptor and ligand concentration, and adhesive interaction, characterize each cell.
 For more details see: https://journals.aps.org/prx/abstract/10.1103/PhysRevX.8.021025
+
+
+%%%%%%%%%
+main.m is main code implementing cell growth, dynamics, and birth-death processes
+Force.m is the code which at each time step calculates the force experienced by cells 
+initCubicGrid.m specifies the initial position of cells 
+randgaussrad.m is generates normally distributed random numbers shifted by the mean and standard deviation
