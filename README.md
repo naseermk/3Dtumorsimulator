@@ -24,4 +24,8 @@ randgaussrad.m is generates normally distributed random numbers shifted by the m
 
 %%%%%%%%%%%
 
+Installation
 
+This code was written to run on Matlab version R2018a
+
+Download all the .m files and place them in the same folder. 
