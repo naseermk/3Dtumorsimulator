@@ -13,6 +13,7 @@ For more details see: https://journals.aps.org/prx/abstract/10.1103/PhysRevX.8.0
 
 
 %%%%%%%%%
+
 main.m is main code implementing cell growth, dynamics, and birth-death processes \
 
 Force.m is the code which at each time step calculates the force experienced by cells \ 
@@ -20,3 +21,7 @@ Force.m is the code which at each time step calculates the force experienced by 
 initCubicGrid.m specifies the initial position of cells \
 
 randgaussrad.m is generates normally distributed random numbers shifted by the mean and standard deviation
+
+%%%%%%%%%%%
+
+
