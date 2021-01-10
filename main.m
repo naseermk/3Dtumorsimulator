@@ -77,7 +77,33 @@ for cyclemsd=1:cyclenum
     receptor = zeros(nPart,1);
     ligand = zeros(nPart,1);
     countdr=0; 
-    
+
+    % The neutral mutations will be stored in a vector of vectors: 
+    % each cell will inherit a list of mutations from its parent, 
+    % and one new unique one. A "mutation" is represented as a number, 
+    % this number is just an index used to track the drift of mutations 
+    % through the population.
+
+    UpperBound = 10^5;
+    genotypes = cell(1,UpperBound);
+
+    % Key: 0 = not a mutation (blank)
+    %      1 = mutation present in all cells
+    %      2 = first mutation to occur after division
+    %      (etc)
+    % for example, before division, a cell may have the mutations
+    % [1,2,5,7]
+    % and afterwards, both it and its daughter have
+    % [1,2,5,7,23]
+    % Following B Waclaw, the index of the latest new mutation (in the example, 23) 
+    % should always be a unique integer: we will set it to the largest
+    % index so far +1.
+
+    latest_mutation = 1;
+
+    % We will also need to update both the parents and the daughter genomes
+    % to be something like
+    % new_genome = [old_genome,[latest_mutation+1]]
     
     for part = 1:nPart
         rad(part,1) = randgaussrad(4.5,0.5); 
@@ -87,6 +113,9 @@ for cyclemsd=1:cyclenum
         ligand(part,1) = randgaussrad(0.9,0.02);
         lifetime(part,1) = 0;
         label(part,1)=part;
+
+        genotypes{1,part} = [1]; % the first few cells are assumed to be clonal
+        % and all contain the same mutation
     end
    
     
@@ -169,8 +198,6 @@ for cyclemsd=1:cyclenum
                 %due to coords=coords+dt*vels + 0.5*dt2*forces equation
                 vels(:,end+1)= ([0,0,0]');
                 
-                
-                
                 %generating random numbers between 0,1
                 a=0;
                 b=1;
@@ -186,6 +213,14 @@ for cyclemsd=1:cyclenum
                 coords(1,part)=coords(1,part)-radmitosis*(1-2^(-1/3))*sin(r4)*cos(r5);
                 coords(2,part)=coords(2,part)-radmitosis*(1-2^(-1/3))*sin(r4)*sin(r5);
                 coords(3,part) = coords(3,part)-radmitosis*(1-2^(-1/3))*cos(r4);
+
+                % add neutral mutation to parent and daughter:
+                % TODO test and finish
+                old_genome = genotypes{1,part};
+                new_genome = [old_genome,[latest_mutation+1]];
+                genotypes{1,part} = new_genome;
+                genotypes{1,end+1} = new_genome;
+                latest_mutation = latest_mutation + 1;
                 
             end
             
@@ -248,6 +283,7 @@ for cyclemsd=1:cyclenum
         if mod(step,printFreq) == 0
             step % Print the step
             cyclemsd
+            latest_mutation % print latest mutation
             
         end
         
@@ -271,7 +307,8 @@ for cyclemsd=1:cyclenum
         track(:,step+1,avini)=coords(:,avini);  
         end
         
-       
+        % TODO save neutral mutation data or frequency distribution
+
         save('fnumin.txt','numin','-ascii','-append');
         
 	     if mod(step,plotFreq) == 0
