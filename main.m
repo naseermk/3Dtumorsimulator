@@ -149,7 +149,7 @@ for cyclemsd=1:cyclenum
         gammat = 0;
         % Implement the Andersen thermostat
         
-	      for part =1:nPart
+	    for part =1:nPart
             gammat = 6*pi*eta*rad(part,1) + gamma3(part,1);
             %dropping the inertial term update the coords
             coords(:,part) = coords(:,part) + (dt*forces(:,part))/(gammat);
@@ -229,31 +229,30 @@ for cyclemsd=1:cyclenum
 
         if deadpart > 0 
             
-                coords(:,deadindex(1:deadpart))=[];
-                rad(deadindex(1:deadpart))=[];
-                modulus(deadindex(1:deadpart)) = [];
-                poisson(deadindex(1:deadpart)) = [];
-                receptor(deadindex(1:deadpart)) =[];
-                ligand(deadindex(1:deadpart)) = [];
-                vels(:,deadindex(1:deadpart))= [];
-		            lifetime(deadindex(1:deadpart))=[];
-                label(deadindex(1:deadpart))= [];        
+            coords(:,deadindex(1:deadpart))=[];
+            rad(deadindex(1:deadpart))=[];
+            modulus(deadindex(1:deadpart)) = [];
+            poisson(deadindex(1:deadpart)) = [];
+            receptor(deadindex(1:deadpart)) =[];
+            ligand(deadindex(1:deadpart)) = [];
+            vels(:,deadindex(1:deadpart))= [];
+                lifetime(deadindex(1:deadpart))=[];
+            label(deadindex(1:deadpart))= [];        
 	
 	        for part=1:deadpart
 		   
-		                if deadindex(part,1)<= numin
-                        deadnumin=deadnumin+1;
-                        deadindexn(deadnumin,1)=deadindex(part,1);
-                     end
+                if deadindex(part,1)<= numin
+                    deadnumin=deadnumin+1;
+                    deadindexn(deadnumin,1)=deadindex(part,1);
+                end
             
-          end
+            end
         
         end
         
         if deadnumin > 0
-           
-                   track(:,:,deadindexn(1:deadnumin,1))= [];
-                   initial(:,deadindexn(1:deadnumin,1))=[];            
+           track(:,:,deadindexn(1:deadnumin,1))= [];
+           initial(:,deadindexn(1:deadnumin,1))=[];            
         end
 
         numin=size(initial,2);
@@ -284,7 +283,7 @@ for cyclemsd=1:cyclenum
             step % Print the step
             cyclemsd
             latest_mutation % print latest mutation
-            
+            time
         end
         
         if mod(step,plotFreq) == 0
@@ -296,44 +295,57 @@ for cyclemsd=1:cyclenum
         
         
         for avini=1:numin
-        ds_msd(step,cyclemsd)=(norm(coords(:,avini)-initial(:,avini)))^2;  
-        ds_msdav(step) = ds_msdav(step) + (ds_msd(step,cyclemsd))/(cyclenum*numin);
-        
-        df(step,cyclemsd)=(norm(coords(:,avini)-initial(:,avini)))^4;
-        df_av(step)=df_av(step)+(df(step,cyclemsd))/(cyclenum*numin);
+            ds_msd(step,cyclemsd)=(norm(coords(:,avini)-initial(:,avini)))^2;  
+            ds_msdav(step) = ds_msdav(step) + (ds_msd(step,cyclemsd))/(cyclenum*numin);
+            
+            df(step,cyclemsd)=(norm(coords(:,avini)-initial(:,avini)))^4;
+            df_av(step)=df_av(step)+(df(step,cyclemsd))/(cyclenum*numin);
         end
         
         for avini=1:numin
-        track(:,step+1,avini)=coords(:,avini);  
+            track(:,step+1,avini)=coords(:,avini);  
         end
         
-        % TODO save neutral mutation data or frequency distribution
-
         save('fnumin.txt','numin','-ascii','-append');
         
-	     if mod(step,plotFreq) == 0
-        		countdr = countdr+1;
-        		deltart(countdr,cyclemsd) = rtumor(coords,centerM);
-		            for part=1:nPart
-                         visdata(1,1:3)=coords(1:3,part);
-                         visdata(1,4)= label(part,1);
-                         visdata(1,5)= lifetime(part,1);
-                         visdata(1,6)= step*dt;
-                         visdata(1,7)= receptor(part,1);
-                         visdata(1,8)= ligand(part,1);
-                         visdata(1,9)= modulus(part,1);
-                         visdata(1,10)= poisson(part,1);
-                         visdata(1,11)= rad(part,1);
-                         visdata(1,12:14)=vels(1:3,part);
-                         visdata(1,15)=cyclemsd;
-                         visdata_row= visdata(1,:);
-                         save('lifetime1.txt','visdata_row', '-ascii','-append');
+	    if mod(step,plotFreq) == 0
+            countdr = countdr+1;
+            deltart(countdr,cyclemsd) = rtumor(coords,centerM);
+                for part=1:nPart
+                     visdata(1,1:3)=coords(1:3,part);
+                     visdata(1,4)= label(part,1);
+                     visdata(1,5)= lifetime(part,1);
+                     visdata(1,6)= step*dt;
+                     visdata(1,7)= receptor(part,1);
+                     visdata(1,8)= ligand(part,1);
+                     visdata(1,9)= modulus(part,1);
+                     visdata(1,10)= poisson(part,1);
+                     visdata(1,11)= rad(part,1);
+                     visdata(1,12:14)=vels(1:3,part);
+                     visdata(1,15)=cyclemsd;
+                     visdata_row= visdata(1,:);
+                     save('lifetime1.txt','visdata_row', '-ascii','-append');
                 end
-       end	 
+        end	 
 
-end
+    end
+ 
+    % compute and write out mutation frequency distribution
+    freqs = []
+    for gene = 1:latest_mutation
+      count = 0
+      for part = 1:UpperBound
+          this_genome = genotypes{1,part};
+          for elem = 1:length(this_genome)
+              if elem == gene
+                  count = count + 1;
+              end
+          end
+      end
+      freqs = [freqs [gene count]];
+    end   
     
-    
+    save('gene_freqs.txt', 'freqs', '-ascii');
     
     % Simulation results
     % ===================
@@ -346,7 +358,7 @@ end
     save('initial.txt','initial','-ascii','-append');    
 end
  
- 
+% Other simulation results: 
  
 
   save('numcellf.txt','numcells','-ascii');
@@ -358,3 +370,4 @@ end
   save('fden_av.txt','den_av','-ascii');
   save('radius.txt','rad','-ascii');
   save('deltart.txt','deltart','-ascii'); 
+
