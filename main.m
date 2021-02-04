@@ -331,9 +331,9 @@ for cyclemsd=1:cyclenum
     end
  
     % compute and write out mutation frequency distribution
-    freqs = []
+    freqs = zeros(latest_mutation,2);
     for gene = 1:latest_mutation
-      count = 0
+      count = 0;
       for part = 1:UpperBound
           this_genome = genotypes{1,part};
           for elem = 1:length(this_genome)
@@ -342,10 +342,13 @@ for cyclemsd=1:cyclenum
               end
           end
       end
-      freqs = [freqs [gene count]];
+      freqs(gene,:) = [gene count];
     end   
+
+    freqs
     
     save('gene_freqs.txt', 'freqs', '-ascii');
+    %writecell(genotypes, 'genotypes.txt', 'Delimiter', 'tab');
     
     % Simulation results
     % ===================
